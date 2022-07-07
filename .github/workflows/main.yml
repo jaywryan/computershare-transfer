@@ -6,15 +6,15 @@ on:
   push:
   workflow_dispatch:
   pull_request:
+env:
+  IMAGE_NAME: my-computershare-transfer
+  TAGS: v1 ${{ github.sha }}
 
 jobs:
   build-push:
-    name: Build and push
     runs-on: ubuntu-latest
+    name: Build and push
     steps:
-      env:
-        IMAGE_NAME: my-computershare-transfer
-        TAGS: v1 ${{ github.sha }}
 
       - name: Checkout
         uses: actions/checkout@v2
