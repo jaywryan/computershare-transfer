@@ -1,31 +1,41 @@
 # This workflow builds a container image for computershare script
 # from ubi and pushes it to Quay
 
-steps:
-  env:
-    IMAGE_NAME: my-computershare-transfer
-    TAGS: v1 ${{ github.sha }}
+name: Build Computershare Image
+on:
+  push:
+  workflow_dispatch:
+  pull_request:
 
-  - name: Checkout
-    uses: actions/checkout@v2
+jobs:
+  build-push:
+    name: Build and push
+    runs-on: ubuntu-latest
+    steps:
+      env:
+        IMAGE_NAME: my-computershare-transfer
+        TAGS: v1 ${{ github.sha }}
 
-  # Setup S2i and Build container image
-  - name: Setup and Build
-    id: build_image
-    uses: redhat-actions/s2i-build@v2
-    with:
-      path_context: '.'
-      # Builder image for a python project
-      builder_image: 'quay.io/sclorg/python-39-minimal'
-      image: ${{ env.IMAGE_NAME }}
-      tags: ${{ env.TAGS }}
+      - name: Checkout
+        uses: actions/checkout@v2
 
-  # Push Image to Quay registry
-  - name: Push To Quay Action
-    uses: redhat-actions/push-to-registry@v2
-    with:
-      image: ${{ steps.build_image.outputs.image }}
-      tags: ${{ steps.build_image.outputs.tags }}
-      registry: quay.io/${{ secrets.QUAY_USERNAME }}
-      username: ${{ secrets.QUAY_USERNAME }}
-      password: ${{ secrets.QUAY_PASSWORD }}
+      # Setup S2i and Build container image
+      - name: Setup and Build
+        id: build_image
+        uses: redhat-actions/s2i-build@v2
+        with:
+          path_context: '.'
+          # Builder image for a python project
+          builder_image: 'quay.io/sclorg/python-39-minimal'
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.TAGS }}
+
+      # Push Image to Quay registry
+      - name: Push To Quay Action
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build_image.outputs.image }}
+          tags: ${{ steps.build_image.outputs.tags }}
+          registry: quay.io/${{ secrets.QUAY_USERNAME }}
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
